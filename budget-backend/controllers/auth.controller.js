@@ -30,7 +30,6 @@ export const registerUser = async (req, res) => {
         _id: user._id,
         name: user.name,
         email: user.email,
-        token: generateToken(user._id),
       });
     } else {
       res.status(400).json({ error: "Invalid user data" });

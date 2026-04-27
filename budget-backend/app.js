@@ -13,3 +13,4 @@ app.use("/api/categories", categoryRoutes);
 app.use("/api/expenses", expenseRoutes);
 app.use("/api/auth", authRoutes);
 export default app;
+
