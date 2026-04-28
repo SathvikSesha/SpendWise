@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import api from "../api/axios";
 import Navbar from "../components/Navbar";
 import toast from "react-hot-toast";
 import { formatCurrency } from "../utils/formatters";
+import "./SpaceDetails.css";
 
 const SpaceDetails = () => {
   const { spaceId } = useParams();
@@ -69,55 +71,69 @@ const SpaceDetails = () => {
     }
   };
 
+  /* ── Loading state ── */
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="sd-root">
         <Navbar />
-        <div className="text-center py-20 text-gray-500">
-          Loading space details...
-        </div>
+        <div className="sd-blob sd-blob-1" />
+        <div className="sd-blob sd-blob-2" />
+        <main className="sd-main">
+          <div className="sd-loading">
+            <div className="sd-spinner" />
+            <p>Loading space details...</p>
+          </div>
+        </main>
       </div>
     );
   }
 
+  /* ── Error state ── */
   if (error || !data) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="sd-root">
         <Navbar />
-        <div className="text-center py-20 text-red-500">{error}</div>
+        <div className="sd-blob sd-blob-1" />
+        <div className="sd-blob sd-blob-2" />
+        <main className="sd-main">
+          <p className="sd-error-text">{error}</p>
+        </main>
       </div>
     );
   }
 
   const { summary, spaceDetails, categoryBreakdown, recentExpenses } = data;
+
   const progressColor = summary.isOverBudget
-    ? "bg-red-600"
+    ? "#ef4444"
     : summary.isThresholdReached
-      ? "bg-orange-500"
-      : "bg-blue-600";
+      ? "#f59e0b"
+      : "#6366f1";
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-12">
+    <div className="sd-root" id="space-details-page">
       <Navbar />
+      <div className="sd-blob sd-blob-1" />
+      <div className="sd-blob sd-blob-2" />
 
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-4">
-        {/* Navigation & Header */}
-        <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <main className="sd-main">
+        {/* ── Header ── */}
+        <motion.div
+          className="sd-header"
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+        >
           <div>
-            <Link
-              to="/dashboard"
-              className="text-sm text-blue-600 hover:underline mb-2 inline-block"
-            >
-              &larr; Back to Dashboard
+            <Link to="/dashboard" className="sd-back">
+              ← Back to Dashboard
             </Link>
-            <h1 className="text-3xl font-bold text-gray-900">
-              {spaceDetails.name}
-            </h1>
+            <h1 className="sd-name">{spaceDetails.name}</h1>
             {spaceDetails.description && (
-              <p className="text-gray-600 mt-1">{spaceDetails.description}</p>
+              <p className="sd-desc">{spaceDetails.description}</p>
             )}
           </div>
-          <div className="flex gap-3">
+          <div className="sd-actions">
             <Link
               to={`/spaces/${spaceId}/edit`}
               state={{
@@ -128,148 +144,122 @@ const SpaceDetails = () => {
                   thresholdPercent: summary.thresholdPercent,
                 },
               }}
-              className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition inline-block"
+              className="sd-btn-outline"
             >
               Edit Space
             </Link>
             <Link
               to={`/spaces/${spaceId}/add-expense`}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium inline-block"
+              className="sd-btn-primary"
             >
               + Add Expense
             </Link>
           </div>
-        </div>
+        </motion.div>
 
-        {/* Threshold Warning Banner */}
+        {/* ── Warning / Over-budget banners ── */}
         {summary.isThresholdReached && !summary.isOverBudget && (
-          <div className="mb-6 bg-orange-50 border-l-4 border-orange-500 p-4 rounded-r-lg">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <span className="text-orange-500 font-bold">⚠️ Warning:</span>
-              </div>
-              <div className="ml-3">
-                <p className="text-sm text-orange-700">
-                  You have used{" "}
-                  <strong>{summary.percentUsed.toFixed(1)}%</strong> of your
-                  budget. You are approaching your limit.
-                </p>
-              </div>
-            </div>
-          </div>
+          <motion.div
+            className="sd-banner sd-banner-warn"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.35 }}
+          >
+            ⚠️ <span>You've used <strong>{summary.percentUsed.toFixed(1)}%</strong> of your budget. Approaching your limit.</span>
+          </motion.div>
         )}
 
         {summary.isOverBudget && (
-          <div className="mb-6 bg-red-50 border-l-4 border-red-600 p-4 rounded-r-lg">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <span className="text-red-600 font-bold">🚨 Over Budget:</span>
-              </div>
-              <div className="ml-3">
-                <p className="text-sm text-red-700">
-                  You have exceeded your budget by{" "}
-                  <strong>
-                    {formatCurrency(Math.abs(summary.remainingBudget))}
-                  </strong>
-                  !
-                </p>
-              </div>
-            </div>
-          </div>
+          <motion.div
+            className="sd-banner sd-banner-danger"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.35 }}
+          >
+            🚨 <span>Over budget by <strong>{formatCurrency(Math.abs(summary.remainingBudget))}</strong>!</span>
+          </motion.div>
         )}
 
-        {/* Budget Overview Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-            <p className="text-sm text-gray-500 font-medium">Total Spent</p>
-            <p className="text-3xl font-bold text-gray-900 mt-1">
-              {formatCurrency(summary.totalSpent)}
-            </p>
-          </div>
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-            <p className="text-sm text-gray-500 font-medium">
-              Remaining Budget
-            </p>
-            <p
-              className={`text-3xl font-bold mt-1 ${
-                summary.isOverBudget ? "text-red-600" : "text-green-600"
-              }`}
+        {/* ── Stat cards ── */}
+        <div className="sd-stats">
+          {[
+            { label: "Total Spent", value: formatCurrency(summary.totalSpent), color: "#e4e4e7" },
+            { label: "Remaining", value: formatCurrency(summary.remainingBudget), color: summary.isOverBudget ? "#f87171" : "#34d399" },
+            { label: "Budget Limit", value: formatCurrency(summary.budgetLimit), color: "#a5b4fc" },
+          ].map((s, i) => (
+            <motion.div
+              key={s.label}
+              className="sd-stat"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 + i * 0.08, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
             >
-              {formatCurrency(summary.remainingBudget)}
-            </p>
-          </div>
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-            <p className="text-sm text-gray-500 font-medium">Budget Limit</p>
-            <p className="text-3xl font-bold text-gray-900 mt-1">
-              {formatCurrency(summary.budgetLimit)}
-            </p>
-          </div>
+              <p className="sd-stat-label">{s.label}</p>
+              <p className="sd-stat-value" style={{ color: s.color }}>{s.value}</p>
+            </motion.div>
+          ))}
         </div>
 
-        {/* Progress Bar */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-8">
-          <div className="flex justify-between text-sm font-medium mb-2">
-            <span className="text-gray-600">
-              Usage: {Math.min(summary.percentUsed, 100).toFixed(0)}%
-            </span>
-            <span className="text-gray-400">
-              Threshold: {summary.thresholdPercent}%
-            </span>
+        {/* ── Progress bar ── */}
+        <motion.div
+          className="sd-progress-card"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3, duration: 0.4 }}
+        >
+          <div className="sd-progress-labels">
+            <span>Usage: {Math.min(summary.percentUsed, 100).toFixed(0)}%</span>
+            <span>Threshold: {summary.thresholdPercent}%</span>
           </div>
-          <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden relative">
-            {/* Threshold Marker */}
+          <div className="sd-progress-track">
             <div
-              className="absolute top-0 bottom-0 w-1 bg-gray-400 z-10"
+              className="sd-threshold-marker"
               style={{ left: `${summary.thresholdPercent}%` }}
-            ></div>
-            <div
-              className={`h-3 rounded-full transition-all duration-500 ${progressColor}`}
-              style={{ width: `${Math.min(summary.percentUsed, 100)}%` }}
-            ></div>
+            />
+            <motion.div
+              className="sd-progress-fill"
+              style={{ background: progressColor, boxShadow: `0 0 10px ${progressColor}44` }}
+              initial={{ width: 0 }}
+              animate={{ width: `${Math.min(summary.percentUsed, 100)}%` }}
+              transition={{ delay: 0.5, duration: 0.8, ease: "easeOut" }}
+            />
           </div>
-        </div>
+        </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Categories Column (Left) */}
-          <div className="lg:col-span-1">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">
-              Spending by Category
-            </h2>
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        {/* ── Bottom grid: Categories + Expenses ── */}
+        <div className="sd-bottom">
+          {/* Categories */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35, duration: 0.4 }}
+          >
+            <h2 className="sd-section-title">Spending by Category</h2>
+            <div className="sd-panel">
               {categoryBreakdown.length === 0 ? (
-                <p className="p-6 text-gray-500 text-center text-sm">
-                  No expenses categorized yet.
-                </p>
+                <p className="sd-cat-empty">No expenses categorized yet.</p>
               ) : (
-                <ul className="divide-y divide-gray-100">
+                <ul className="sd-cat-list">
                   {categoryBreakdown.map((cat) => (
-                    <li
-                      key={cat._id}
-                      className="p-4 flex justify-between items-center hover:bg-gray-50 group"
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="font-medium text-gray-700 capitalize">
-                          {cat.name}
-                        </span>
-                        {/* Hidden action buttons that appear on hover */}
-                        <div className="hidden group-hover:flex gap-2">
+                    <li key={cat._id} className="sd-cat-item">
+                      <div className="sd-cat-left">
+                        <span className="sd-cat-name">{cat.name}</span>
+                        <div className="sd-cat-actions">
                           <button
-                            onClick={() =>
-                              handleEditCategory(cat._id, cat.name)
-                            }
-                            className="text-xs text-blue-500 hover:underline"
+                            onClick={() => handleEditCategory(cat._id, cat.name)}
+                            className="sd-cat-action sd-cat-action-edit"
                           >
                             Edit
                           </button>
                           <button
                             onClick={() => handleDeleteCategory(cat._id)}
-                            className="text-xs text-red-500 hover:underline"
+                            className="sd-cat-action sd-cat-action-del"
                           >
                             Delete
                           </button>
                         </div>
                       </div>
-                      <span className="text-gray-900 font-semibold">
+                      <span className="sd-cat-amount">
                         {formatCurrency(cat.totalSpent)}
                       </span>
                     </li>
@@ -277,58 +267,56 @@ const SpaceDetails = () => {
                 </ul>
               )}
             </div>
-          </div>
+          </motion.div>
 
-          {/* Recent Expenses Column (Right) */}
-          <div className="lg:col-span-2">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">
-              Recent Expenses
-            </h2>
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          {/* Recent Expenses */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.4 }}
+          >
+            <h2 className="sd-section-title">Recent Expenses</h2>
+            <div className="sd-panel">
               {recentExpenses.length === 0 ? (
-                <p className="p-6 text-gray-500 text-center">
+                <p className="sd-exp-empty">
                   No expenses logged yet. Add your first one!
                 </p>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse">
+                <div className="sd-table-wrap">
+                  <table className="sd-table">
                     <thead>
-                      <tr className="bg-gray-50 text-gray-600 text-sm border-b border-gray-200">
-                        <th className="p-4 font-medium">Title</th>
-                        <th className="p-4 font-medium">Category</th>
-                        <th className="p-4 font-medium">Date</th>
-                        <th className="p-4 font-medium text-right">Amount</th>
+                      <tr>
+                        <th>Title</th>
+                        <th>Category</th>
+                        <th>Date</th>
+                        <th style={{ textAlign: "right" }}>Amount</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100 text-sm">
+                    <tbody>
                       {recentExpenses.map((expense) => (
-                        <tr
-                          key={expense._id}
-                          className="hover:bg-gray-50 group"
-                        >
-                          <td className="p-4 font-medium text-gray-900 flex flex-col">
-                            {expense.title}
-                            {/* Actions that appear on hover */}
-                            <div className="hidden group-hover:flex gap-3 mt-1">
+                        <tr key={expense._id}>
+                          <td>
+                            <div className="sd-exp-title">{expense.title}</div>
+                            <div className="sd-exp-actions">
                               <Link
                                 to={`/spaces/${spaceId}/edit-expense/${expense._id}`}
                                 state={{ expense }}
-                                className="text-xs text-blue-500 hover:underline"
+                                className="sd-exp-action sd-exp-action-edit"
                               >
                                 Edit
                               </Link>
                               <button
                                 onClick={() => handleDeleteExpense(expense._id)}
-                                className="text-xs text-red-500 hover:underline"
+                                className="sd-exp-action-del"
                               >
                                 Delete
                               </button>
                             </div>
                           </td>
-                          <td className="p-4 text-gray-600 capitalize">
+                          <td className="sd-exp-category">
                             {expense.category?.name || "Uncategorized"}
                           </td>
-                          <td className="p-4 text-gray-500">
+                          <td>
                             {new Date(expense.date).toLocaleDateString(
                               "en-IN",
                               {
@@ -338,7 +326,7 @@ const SpaceDetails = () => {
                               },
                             )}
                           </td>
-                          <td className="p-4 text-right font-semibold text-gray-900">
+                          <td className="sd-exp-amount">
                             {formatCurrency(expense.amount)}
                           </td>
                         </tr>
@@ -348,7 +336,7 @@ const SpaceDetails = () => {
                 </div>
               )}
             </div>
-          </div>
+          </motion.div>
         </div>
       </main>
     </div>
