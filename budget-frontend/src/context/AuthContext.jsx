@@ -13,7 +13,7 @@ export const AuthProvider = ({ children }) => {
     if (userInfo) {
       setUser(JSON.parse(userInfo));
     }
-    setAuthLoading(false); // Done checking storage
+    setAuthLoading(false);
   }, []);
 
   const login = (userData) => {
@@ -25,7 +25,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setUser(null);
     localStorage.removeItem("userInfo");
-    navigate("/login");
+    navigate("/");
   };
 
   return (
