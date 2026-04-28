@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useParams, useNavigate, useLocation, Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import api from "../api/axios";
 import Navbar from "../components/Navbar";
+import "./FormPage.css";
 
 const EditSpace = () => {
   const { spaceId } = useParams();
@@ -61,117 +63,125 @@ const EditSpace = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="form-page" id="edit-space-page">
       <Navbar />
+      <div className="form-blob form-blob-1" />
+      <div className="form-blob form-blob-2" />
 
-      <main className="max-w-2xl mx-auto px-4 py-12">
-        <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200">
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-2xl font-bold text-gray-800">
-              Edit Space Settings
-            </h1>
-            <Link
-              to={`/spaces/${spaceId}`}
-              className="text-gray-500 hover:text-gray-700 font-medium text-sm transition"
-            >
-              Cancel
-            </Link>
+      <main className="form-main">
+        <motion.div
+          className="form-card"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        >
+          {/* Header */}
+          <div className="form-header">
+            <h1 className="form-title">Edit Space Settings</h1>
+            <Link to={`/spaces/${spaceId}`} className="form-cancel">Cancel</Link>
           </div>
 
           {error && (
-            <div className="mb-6 p-4 bg-red-50 text-red-700 rounded-lg border border-red-200 text-sm">
+            <motion.div
+              className="form-error"
+              initial={{ opacity: 0, y: -5 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
               {error}
-            </div>
+            </motion.div>
           )}
 
-          <form onSubmit={handleUpdate} className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Space Name
-              </label>
+          <form onSubmit={handleUpdate} className="form-body">
+            {/* Space Name */}
+            <div className="form-field">
+              <label className="form-label">Space Name</label>
               <input
                 type="text"
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                disabled={loading}
+                className="form-input"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Description
-              </label>
+            {/* Description */}
+            <div className="form-field">
+              <label className="form-label">Description</label>
               <textarea
                 rows="3"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+                disabled={loading}
+                className="form-textarea"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
               ></textarea>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Budget Limit (₹)
-                </label>
+            <div className="form-row">
+              {/* Budget Limit */}
+              <div className="form-field">
+                <label className="form-label">Budget Limit (₹)</label>
                 <input
                   type="number"
                   required
+                  disabled={loading}
                   min="1"
                   step="0.01"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="form-input"
                   value={budgetLimit}
                   onChange={(e) => setBudgetLimit(e.target.value)}
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Alert Threshold (%)
-                </label>
-                <div className="flex items-center gap-4">
+              {/* Threshold */}
+              <div className="form-field">
+                <label className="form-label">Alert Threshold (%)</label>
+                <div className="form-range-wrap">
                   <input
                     type="range"
                     min="50"
                     max="100"
-                    className="w-full accent-blue-600"
+                    disabled={loading}
+                    className="form-range"
                     value={thresholdPercent}
                     onChange={(e) => setThresholdPercent(Number(e.target.value))}
                   />
-                  <span className="text-gray-700 font-semibold w-12 text-right">
+                  <span className="form-range-value">
                     {thresholdPercent}%
                   </span>
                 </div>
               </div>
             </div>
 
-            <div className="pt-4">
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition mb-4"
-              >
-                {loading ? "Saving..." : "Update Space"}
-              </button>
-            </div>
+            {/* Submit */}
+            <motion.button
+              type="submit"
+              disabled={loading}
+              className="form-submit"
+              whileTap={{ scale: 0.97 }}
+            >
+              {loading ? "Saving..." : "Update Space"}
+            </motion.button>
           </form>
 
           {/* Danger Zone */}
-          <div className="mt-8 pt-8 border-t border-gray-200">
-            <h3 className="text-red-600 font-bold mb-2">Danger Zone</h3>
-            <p className="text-sm text-gray-500 mb-4">
-              Once you delete a space, there is no going back. Please be
-              certain.
+          <div className="form-danger">
+            <h3 className="form-danger-title">Danger Zone</h3>
+            <p className="form-danger-text">
+              Once you delete a space, there is no going back. Please be certain.
             </p>
             <button
               onClick={handleDeleteSpace}
-              className="px-4 py-2 bg-white border border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 rounded-lg transition font-medium text-sm"
+              className="form-danger-btn"
             >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+              </svg>
               Delete this Space
             </button>
           </div>
-        </div>
+        </motion.div>
       </main>
     </div>
   );

@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import api from "../api/axios";
 import Navbar from "../components/Navbar";
+import "./FormPage.css";
 
 const CreateSpace = () => {
   const navigate = useNavigate();
@@ -47,67 +49,71 @@ const CreateSpace = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="form-page" id="create-space-page">
       <Navbar />
+      <div className="form-blob form-blob-1" />
+      <div className="form-blob form-blob-2" />
 
-      <main className="max-w-2xl mx-auto px-4 py-12">
-        <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200">
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-2xl font-bold text-gray-800">
-              Create New Space
-            </h1>
-            <Link
-              to="/dashboard"
-              className="text-gray-500 hover:text-gray-700 font-medium text-sm transition"
-            >
-              Cancel
-            </Link>
+      <main className="form-main">
+        <motion.div
+          className="form-card"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        >
+          {/* Header */}
+          <div className="form-header">
+            <h1 className="form-title">Create New Space</h1>
+            <Link to="/dashboard" className="form-cancel">Cancel</Link>
           </div>
 
           {error && (
-            <div className="mb-6 p-4 bg-red-50 text-red-700 rounded-lg border border-red-200 text-sm">
+            <motion.div
+              className="form-error"
+              initial={{ opacity: 0, y: -5 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
               {error}
-            </div>
+            </motion.div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="form-body">
             {/* Space Name */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Space Name <span className="text-red-500">*</span>
+            <div className="form-field">
+              <label className="form-label">
+                Space Name <span className="req">*</span>
               </label>
               <input
                 type="text"
                 required
                 disabled={loading}
                 placeholder="e.g., Europe Trip, Monthly Groceries"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                className="form-input"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
             </div>
 
             {/* Description */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Description{" "}
-                <span className="text-gray-400 font-normal">(Optional)</span>
+            <div className="form-field">
+              <label className="form-label">
+                Description <span className="opt">(Optional)</span>
               </label>
               <textarea
                 rows="3"
                 disabled={loading}
                 placeholder="What is this budget for?"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition resize-none"
+                className="form-textarea"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
               ></textarea>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="form-row">
               {/* Budget Limit */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Budget Limit (₹) <span className="text-red-500">*</span>
+              <div className="form-field">
+                <label className="form-label">
+                  Budget Limit (₹) <span className="req">*</span>
                 </label>
                 <input
                   type="number"
@@ -116,60 +122,53 @@ const CreateSpace = () => {
                   min="1"
                   step="0.01"
                   placeholder="0.00"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                  className="form-input"
                   value={budgetLimit}
                   onChange={(e) => setBudgetLimit(e.target.value)}
                 />
               </div>
 
               {/* Threshold */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Alert Threshold (%) <span className="text-red-500">*</span>
+              <div className="form-field">
+                <label className="form-label">
+                  Alert Threshold (%) <span className="req">*</span>
                 </label>
-                <div className="flex items-center gap-4">
+                <div className="form-range-wrap">
                   <input
                     type="range"
                     min="50"
                     max="100"
                     disabled={loading}
-                    className="w-full accent-blue-600"
+                    className="form-range"
                     value={thresholdPercent}
                     onChange={(e) =>
                       setThresholdPercent(Number(e.target.value))
                     }
                   />
-                  <span className="text-gray-700 font-semibold w-12 text-right">
+                  <span className="form-range-value">
                     {thresholdPercent}%
                   </span>
                 </div>
-
-                <p className="text-xs text-gray-500 mt-1">
-                  We'll notify you when you spend ₹
+                <p className="form-hint">
+                  Alert at ₹
                   {budgetLimit
                     ? ((budgetLimit * thresholdPercent) / 100).toFixed(2)
                     : "0.00"}
-                  .
                 </p>
               </div>
             </div>
 
             {/* Submit */}
-            <div className="pt-4">
-              <button
-                type="submit"
-                disabled={loading}
-                className={`w-full py-3 rounded-lg font-semibold text-white transition ${
-                  loading
-                    ? "bg-blue-400 cursor-not-allowed"
-                    : "bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg"
-                }`}
-              >
-                {loading ? "Creating Space..." : "Create Space"}
-              </button>
-            </div>
+            <motion.button
+              type="submit"
+              disabled={loading}
+              className="form-submit"
+              whileTap={{ scale: 0.97 }}
+            >
+              {loading ? "Creating Space..." : "Create Space"}
+            </motion.button>
           </form>
-        </div>
+        </motion.div>
       </main>
     </div>
   );

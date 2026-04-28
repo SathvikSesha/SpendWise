@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import api from "../api/axios";
 import Navbar from "../components/Navbar";
 import toast from "react-hot-toast";
+import "./FormPage.css";
 
 const AddExpense = () => {
   const { spaceId } = useParams();
@@ -55,88 +57,89 @@ const AddExpense = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="form-page" id="add-expense-page">
       <Navbar />
+      <div className="form-blob form-blob-1" />
+      <div className="form-blob form-blob-2" />
 
-      <main className="max-w-2xl mx-auto px-4 py-12">
-        <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200">
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-2xl font-bold text-gray-800">
-              Log New Expense
-            </h1>
-            <Link
-              to={`/spaces/${spaceId}`}
-              className="text-gray-500 hover:text-gray-700 font-medium text-sm transition"
-            >
-              Cancel
-            </Link>
+      <main className="form-main">
+        <motion.div
+          className="form-card"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        >
+          {/* Header */}
+          <div className="form-header">
+            <h1 className="form-title">Log New Expense</h1>
+            <Link to={`/spaces/${spaceId}`} className="form-cancel">Cancel</Link>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                What did you buy? <span className="text-red-500">*</span>
+          <form onSubmit={handleSubmit} className="form-body">
+            {/* Title */}
+            <div className="form-field">
+              <label className="form-label">
+                What did you buy? <span className="req">*</span>
               </label>
               <input
                 type="text"
                 required
+                disabled={loading}
                 placeholder="e.g., Uber to Airport, Morning Coffee"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                className="form-input"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Amount (₹) <span className="text-red-500">*</span>
+            <div className="form-row">
+              {/* Amount */}
+              <div className="form-field">
+                <label className="form-label">
+                  Amount (₹) <span className="req">*</span>
                 </label>
                 <input
                   type="number"
                   required
+                  disabled={loading}
                   min="0.01"
                   step="0.01"
                   placeholder="0.00"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                  className="form-input"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Category <span className="text-red-500">*</span>
+              {/* Category */}
+              <div className="form-field">
+                <label className="form-label">
+                  Category <span className="req">*</span>
                 </label>
                 <input
                   type="text"
                   required
+                  disabled={loading}
                   placeholder="e.g., Food, Transport, Bills"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                  className="form-input"
                   value={categoryName}
                   onChange={(e) => setCategoryName(e.target.value)}
                 />
-                <p className="text-xs text-gray-500 mt-1">
-                  Type a new or existing category.
-                </p>
+                <p className="form-hint">Type a new or existing category.</p>
               </div>
             </div>
 
-            <div className="pt-4">
-              <button
-                type="submit"
-                disabled={loading}
-                className={`w-full py-3 rounded-lg font-semibold text-white transition ${
-                  loading
-                    ? "bg-blue-400 cursor-not-allowed"
-                    : "bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg"
-                }`}
-              >
-                {loading ? "Saving..." : "Add Expense"}
-              </button>
-            </div>
+            {/* Submit */}
+            <motion.button
+              type="submit"
+              disabled={loading}
+              className="form-submit"
+              whileTap={{ scale: 0.97 }}
+            >
+              {loading ? "Saving..." : "Add Expense"}
+            </motion.button>
           </form>
-        </div>
+        </motion.div>
       </main>
     </div>
   );
