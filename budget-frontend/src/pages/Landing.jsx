@@ -10,7 +10,7 @@ const cards = [
     spent: "₹12,400",
     remaining: "₹12,600",
     percent: 50,
-    accent: "#6366f1",       // indigo
+    accent: "#6366f1", // indigo
     items: ["Flights — ₹6,200", "Hotels — ₹4,100", "Food — ₹2,100"],
   },
   {
@@ -19,7 +19,7 @@ const cards = [
     spent: "₹5,320",
     remaining: "₹2,680",
     percent: 67,
-    accent: "#f59e0b",       // amber
+    accent: "#f59e0b", // amber
     items: ["Vegetables — ₹1,800", "Dairy — ₹1,520", "Snacks — ₹2,000"],
   },
   {
@@ -28,17 +28,13 @@ const cards = [
     spent: "₹2,100",
     remaining: "₹1,400",
     percent: 60,
-    accent: "#10b981",       // emerald
+    accent: "#10b981", // emerald
     items: ["Netflix — ₹649", "Spotify — ₹119", "Cloud — ₹1,332"],
   },
 ];
 
 /* ── Each line of hero text ── */
-const headingLines = [
-  "Your Money.",
-  "Your Rules.",
-  "Your Spaces.",
-];
+const headingLines = ["Your Money.", "Your Rules.", "Your Spaces."];
 
 const subLines = [
   "Create custom budget spaces, track every rupee,",
@@ -64,14 +60,14 @@ const fadeUp = {
 };
 
 const cardTransforms = [
-  { rotate: -12, x: -50, y: 30, z: 0 },  
-  { rotate: 0, x: 0, y: -10, z: 1 },     
-  { rotate: 12, x: 50, y: 30, z: 2 },    
+  { rotate: -12, x: -50, y: 30, z: 0 },
+  { rotate: 0, x: 0, y: -10, z: 1 },
+  { rotate: 12, x: 50, y: 30, z: 2 },
 ];
 
 const Landing = () => {
-  const totalHeadDelay = headingLines.length * 0.25 + 0.5;      
-  const totalSubDelay = totalHeadDelay + subLines.length * 0.22;   
+  const totalHeadDelay = headingLines.length * 0.25 + 0.5;
+  const totalSubDelay = totalHeadDelay + subLines.length * 0.22;
   const btnDelay = totalSubDelay + 0.3;
 
   return (
@@ -137,7 +133,7 @@ const Landing = () => {
           <div className="card-stack">
             {cards.map((card, idx) => {
               const t = cardTransforms[idx];
-              const floatDelay = idx * 1.3;        // stagger the float
+              const floatDelay = idx * 1.3; // stagger the float
               const cardDelay = btnDelay + 0.15 + idx * 0.18;
 
               return (
@@ -153,14 +149,26 @@ const Landing = () => {
                     opacity: 1,
                     scale: 1,
                     x: t.x,
-                    y: [t.y, t.y - 12, t.y],      // float loop
+                    y: [t.y, t.y - 12, t.y], // float loop
                     rotate: t.rotate,
                   }}
                   transition={{
                     opacity: { delay: cardDelay, duration: 0.6 },
-                    scale: { delay: cardDelay, duration: 0.7, ease: [0.22, 1, 0.36, 1] },
-                    x: { delay: cardDelay, duration: 0.7, ease: [0.22, 1, 0.36, 1] },
-                    rotate: { delay: cardDelay, duration: 0.7, ease: [0.22, 1, 0.36, 1] },
+                    scale: {
+                      delay: cardDelay,
+                      duration: 0.7,
+                      ease: [0.22, 1, 0.36, 1],
+                    },
+                    x: {
+                      delay: cardDelay,
+                      duration: 0.7,
+                      ease: [0.22, 1, 0.36, 1],
+                    },
+                    rotate: {
+                      delay: cardDelay,
+                      duration: 0.7,
+                      ease: [0.22, 1, 0.36, 1],
+                    },
                     y: {
                       delay: cardDelay,
                       duration: 3.5,
@@ -169,13 +177,6 @@ const Landing = () => {
                       repeatType: "loop",
                       repeatDelay: 0,
                     },
-                  }}
-                  whileHover={{
-                    y: t.y - 24,
-                    scale: 1.07,
-                    rotate: 0,
-                    zIndex: 10,
-                    transition: { duration: 0.35, ease: "easeOut" },
                   }}
                   id={`hero-card-${idx}`}
                 >
@@ -192,7 +193,11 @@ const Landing = () => {
                       className="card-progress-fill"
                       initial={{ width: 0 }}
                       animate={{ width: `${card.percent}%` }}
-                      transition={{ delay: btnDelay + 0.6 + idx * 0.2, duration: 1, ease: "easeOut" }}
+                      transition={{
+                        delay: btnDelay + 0.6 + idx * 0.2,
+                        duration: 1,
+                        ease: "easeOut",
+                      }}
                     />
                   </div>
 
@@ -204,7 +209,9 @@ const Landing = () => {
                     </div>
                     <div>
                       <span className="stat-label">Left</span>
-                      <span className="stat-value remaining">{card.remaining}</span>
+                      <span className="stat-value remaining">
+                        {card.remaining}
+                      </span>
                     </div>
                   </div>
 
