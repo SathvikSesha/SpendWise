@@ -3,7 +3,12 @@ import bcrypt from "bcryptjs";
 
 const userSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true, trim: true },
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
     email: {
       type: String,
       required: true,
@@ -11,13 +16,27 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
     },
-    password: { type: String, required: true, select: false },
+
+    password: {
+      type: String,
+      select: false,
+      required: function () {
+        return this.authMethod === "email";
+      },
+    },
+
+    authMethod: {
+      type: String,
+      enum: ["email", "google"],
+      default: "email",
+    },
   },
   { timestamps: true },
 );
 
 userSchema.pre("save", async function () {
-  if (!this.isModified("password")) return;
+  if (!this.isModified("password") || !this.password) return;
+
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
 });
