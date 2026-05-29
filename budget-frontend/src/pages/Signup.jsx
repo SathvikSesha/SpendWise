@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import api from "../api/axios";
 import "./Auth.css";
+import { GoogleLogin } from "@react-oauth/google";
+import { AuthContext } from "../context/AuthContext";
 
 const Signup = () => {
   const [name, setName] = useState("");
@@ -10,6 +12,7 @@ const Signup = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const { login } = useContext(AuthContext);
 
   const navigate = useNavigate();
 
@@ -21,11 +24,17 @@ const Signup = () => {
     if (!emailRegex.test(email)) return "Enter a valid email";
 
     if (!password) return "Password is required";
-    if (password.length < 6)
-      return "Password must be at least 6 characters";
+    if (password.length < 6) return "Password must be at least 6 characters";
 
     return null;
   };
+  useEffect(() => {
+    if (!error) return;
+    const timer = setTimeout(() => {
+      setError("");
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [error]);
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -53,6 +62,19 @@ const Signup = () => {
     }
   };
 
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setLoading(true);
+    try {
+      const { data } = await api.post("/auth/google", {
+        credential: credentialResponse.credential,
+      });
+      login(data);
+    } catch (err) {
+      setError(err.response?.data?.error || "Google login failed");
+      setLoading(false);
+    }
+  };
+
   return (
     <motion.div
       className="auth-root"
@@ -73,16 +95,19 @@ const Signup = () => {
         transition={{ duration: 0.5, ease: "easeOut" }}
       >
         <Link to="/" className="auth-back">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
           Back to home
         </Link>
 
         <h2 className="auth-title">Create Account</h2>
-        <p className="auth-subtitle">
-          Start tracking your budget in seconds
-        </p>
+        <p className="auth-subtitle">Start tracking your budget in seconds</p>
 
         {error && (
           <motion.p
@@ -144,6 +169,29 @@ const Signup = () => {
             {loading ? "Creating..." : "Sign Up"}
           </motion.button>
         </form>
+
+        {/* Updated Divider using your Custom CSS */}
+        <div className="auth-divider">or</div>
+
+        {/* Upgraded Google Button for Dark Mode */}
+        <div
+          className="flex justify-center"
+          style={{ opacity: loading ? 0.5 : 1, marginTop: "0.5rem" }}
+        >
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={() => {
+              setError("Google Sign-In was cancelled or failed");
+              setLoading(false);
+            }}
+            useOneTap={true}
+            theme="filled_black"
+            size="extra-large"
+            shape="rectangular"
+            text="continue_with"
+            width="100%"
+          />
+        </div>
 
         <p className="auth-footer">
           Already have an account? <Link to="/login">Log in</Link>
