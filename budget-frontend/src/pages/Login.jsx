@@ -1,9 +1,10 @@
-import { useState, useContext,useEffect } from "react";
+import { useState, useContext, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import api from "../api/axios";
 import { AuthContext } from "../context/AuthContext";
 import "./Auth.css";
+import { GoogleLogin } from "@react-oauth/google";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -13,7 +14,6 @@ const Login = () => {
 
   const { login } = useContext(AuthContext);
 
-  // 🔥 Auto-clear error after 3s
   useEffect(() => {
     if (!error) return;
 
@@ -62,6 +62,19 @@ const Login = () => {
     }
   };
 
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setLoading(true);
+    try {
+      const { data } = await api.post("/auth/google", {
+        credential: credentialResponse.credential,
+      });
+      login(data);
+    } catch (err) {
+      setError(err.response?.data?.error || "Google login failed");
+      setLoading(false);
+    }
+  };
+
   return (
     <motion.div
       className="auth-root"
@@ -82,7 +95,12 @@ const Login = () => {
         transition={{ duration: 0.5, ease: "easeOut" }}
       >
         <Link to="/" className="auth-back">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
           Back to home
@@ -140,6 +158,29 @@ const Login = () => {
             {loading ? "Logging in..." : "Log In"}
           </motion.button>
         </form>
+
+        {/* Updated Divider using your Custom CSS */}
+        <div className="auth-divider">or</div>
+
+        {/* Upgraded Google Button for Dark Mode */}
+        <div
+          className="flex justify-center"
+          style={{ opacity: loading ? 0.5 : 1, marginTop: "0.5rem" }}
+        >
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={() => {
+              setError("Google Sign-In was cancelled or failed");
+              setLoading(false);
+            }}
+            useOneTap={true}
+            theme="filled_black"
+            size="extra-large"
+            shape="rectangular"
+            text="continue_with"
+            width="100%"
+          />
+        </div>
 
         <p className="auth-footer">
           Don't have an account? <Link to="/signup">Sign up</Link>
